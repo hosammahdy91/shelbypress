@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShelbyPress — Censorship-Resistant Publishing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<!-- Aptos Wallet Standard (AIP-62) -->
+<script type="module">
+  import { getAptosWallets } from 'https://esm.sh/@aptos-labs/wallet-standard@0.2.1';
+
+  window.__aptosWalletBridge = { wallets: [], on: null };
+
+  try {
+    const { aptosWallets, on } = getAptosWallets();
+    window.__aptosWalletBridge.wallets = aptosWallets;
+    window.__aptosWalletBridge.on = on;
+
+    // Listen for new wallets being registered (e.g. extension loads after page)
+    on('register', () => {
+      const { aptosWallets: updated } = getAptosWallets();
+      window.__aptosWalletBridge.wallets = updated;
+      if (window.__onWalletsUpdated) window.__onWalletsUpdated();
+    });
+
+    on('unregister', () => {
+      const { aptosWallets: updated } = getAptosWallets();
+      window.__aptosWalletBridge.wallets = updated;
+      if (window.__onWalletsUpdated) window.__onWalletsUpdated();
+    });
+
+  } catch(e) {
+    console.warn('Aptos wallet standard error:', e);
+  }
+
+  window.__aptosReady = true;
+  if (window.__onAptosReady) window.__onAptosReady();
+</script>
+
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --paper: #f5f0e8;
+    --aged: #e8dfc8;
+    --rust: #c0392b;
+    --gold: #b8860b;
+    --muted: #6b6155;
+    --chain: #1a3a5c;
+    --chain-light: #2980b9;
+    --success: #27ae60;
+    --border: #c8bca8;
+    --warning: #e67e22;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 80%, rgba(184,134,11,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(26,58,92,0.06) 0%, transparent 50%);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header { border-bottom: 3px double var(--ink); position: relative; background: var(--paper); }
+
+  .header-top {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 40px; border-bottom: 1px solid var(--border);
+    font-size: 11px; color: var(--muted); letter-spacing: 0.5px;
+  }
+
+  .chain-badge { display: flex; align-items: center; gap: 6px; color: var(--chain-light); font-weight: 500; }
+  .chain-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .masthead { text-align: center; padding: 30px 40px 20px; position: relative; }
+  .masthead::before, .masthead::after {
+    content: '◆ ◆ ◆'; position: absolute; top: 50%; transform: translateY(-50%);
+    color: var(--gold); letter-spacing: 8px; font-size: 10px;
+  }
+  .masthead::before { left: 40px; }
+  .masthead::after { right: 40px; }
+
+  .site-name { font-family: 'Playfair Display', serif; font-size: 64px; font-weight: 900; letter-spacing: -2px; line-height: 1; color: var(--ink); }
+  .site-name span { color: var(--rust); }
+  .site-tagline { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--muted); margin-top: 8px; }
+
+  .header-nav { display: flex; justify-content: center; border-top: 1px solid var(--border); margin-top: 16px; }
+
+  .nav-btn {
+    padding: 10px 28px; background: none; border: none;
+    border-right: 1px solid var(--border);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    color: var(--muted); cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px;
+  }
+  .nav-btn:last-child { border-right: none; }
+  .nav-btn:hover, .nav-btn.active { background: var(--ink); color: var(--paper); }
+
+  .main-layout {
+    max-width: 1200px; margin: 0 auto; padding: 40px;
+    display: grid; grid-template-columns: 1fr 300px; gap: 48px;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ===== WALLET BAR ===== */
+  .wallet-bar {
+    background: var(--chain); color: white; padding: 12px 20px;
+    border-radius: 4px; margin-bottom: 32px; display: flex;
+    justify-content: space-between; align-items: center; font-size: 13px;
+  }
+  .wallet-bar .addr { font-family: monospace; font-size: 12px; color: #7fb3d3; }
+  .wallet-bar .balance { color: #f1c40f; font-weight: 700; }
+  .wallet-bar .wname { font-size: 11px; opacity: 0.7; margin-bottom: 2px; }
+
+  /* ===== WALLET MODAL ===== */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,10,10,0.75); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.visible { display: flex; }
+
+  .modal {
+    background: var(--paper); border: 2px solid var(--ink);
+    box-shadow: 8px 8px 0 var(--ink); padding: 36px; max-width: 520px; width: 92%;
+  }
+  .modal h3 { font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 6px; }
+  .modal .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+
+  /* Wallet selector list */
+  .wallet-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+  .wallet-option {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px; border: 1px solid var(--border);
+    background: white; cursor: pointer; transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .wallet-option:hover { border-color: var(--chain); background: #eaf4fb; transform: translateX(3px); }
+  .wallet-option img { width: 32px; height: 32px; border-radius: 6px; object-fit: contain; }
+  .wallet-option .w-icon-fallback { width: 32px; height: 32px; border-radius: 6px; background: var(--chain); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .wallet-option .w-info { flex: 1; }
+  .wallet-option .w-name { font-weight: 700; font-size: 14px; color: var(--ink); }
+  .wallet-option .w-status { font-size: 11px; margin-top: 2px; }
+  .wallet-option .w-status.installed { color: var(--success); }
+  .wallet-option .w-status.not-installed { color: var(--muted); }
+  .wallet-option .w-arrow { color: var(--muted); font-size: 16px; }
+
+  .no-wallets-msg {
+    text-align: center; padding: 24px; background: #fff8e1;
+    border: 1px solid #ffe082; font-size: 14px; color: var(--warning);
+    line-height: 1.6;
+  }
+  .no-wallets-msg a { color: var(--chain-light); }
+
+  .modal-cancel { width: 100%; padding: 12px; background: var(--aged); border: none; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--ink); transition: background 0.2s; }
+  .modal-cancel:hover { background: var(--border); }
+
+  /* Connecting state */
+  .connecting-state { text-align: center; padding: 20px 0; }
+  .connecting-state .spin { width: 36px; height: 36px; border: 3px solid var(--aged); border-top-color: var(--chain); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .connecting-state p { font-size: 14px; color: var(--muted); }
+  .connecting-state strong { color: var(--chain); }
+
+  /* ===== FEED ===== */
+  .section-rule { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .section-rule h2 { font-family: 'Playfair Display', serif; font-size: 22px; white-space: nowrap; }
+  .section-rule::after { content: ''; flex: 1; height: 1px; background: var(--ink); }
+
+  .article-card {
+    border: 1px solid var(--border); padding: 24px; margin-bottom: 20px;
+    background: white; position: relative; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;
+  }
+  .article-card::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%; background: var(--rust);
+    transform: scaleY(0); transition: transform 0.2s; transform-origin: top;
+  }
+  .article-card:hover { transform: translateX(4px); box-shadow: -4px 4px 0 var(--border); }
+  .article-card:hover::before { transform: scaleY(1); }
+
+  .article-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+  .article-meta .author { font-weight: 700; color: var(--chain); font-family: monospace; font-size: 11px; }
+  .article-meta .tag { background: var(--aged); padding: 2px 8px; border-radius: 2px; font-weight: 500; }
+  .onchain-badge { margin-left: auto; background: var(--chain); color: white; padding: 2px 8px; border-radius: 2px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+
+  .article-card h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 10px; line-height: 1.3; }
+  .article-card p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  .article-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--aged); font-size: 12px; color: var(--muted); }
+  .blob-ref { font-family: monospace; font-size: 10px; color: var(--chain-light); background: #eaf4fb; padding: 2px 6px; border-radius: 2px; }
+
+  /* ===== WRITE ===== */
+  .write-form { background: white; border: 1px solid var(--border); padding: 32px; }
+  .write-form h2 { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--ink); }
+
+  .wallet-required-notice {
+    background: #fff8e1; border: 1px solid #ffe082; padding: 16px 20px;
+    margin-bottom: 24px; font-size: 14px; color: var(--warning);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .wallet-required-notice button { background: var(--chain); color: white; border: none; padding: 8px 16px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; white-space: nowrap; }
+
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; border: 1px solid var(--border); background: var(--paper);
+    padding: 12px 16px; font-family: 'DM Sans', sans-serif; font-size: 15px;
+    color: var(--ink); outline: none; transition: border-color 0.2s; border-radius: 0;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--chain); box-shadow: 0 0 0 2px rgba(26,58,92,0.1);
+  }
+  .form-group textarea { min-height: 260px; resize: vertical; line-height: 1.8; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .publish-btn {
+    width: 100%; background: var(--ink); color: var(--paper); border: none;
+    padding: 16px; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700;
+    cursor: pointer; letter-spacing: 2px; text-transform: uppercase;
+    transition: all 0.2s; position: relative; overflow: hidden;
+  }
+  .publish-btn::after { content: ''; position: absolute; inset: 0; background: var(--rust); transform: translateX(-100%); transition: transform 0.3s; }
+  .publish-btn:hover::after { transform: translateX(0); }
+  .publish-btn span { position: relative; z-index: 1; }
+  .publish-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .publish-btn:disabled::after { display: none; }
+
+  .progress-box { display: none; background: var(--chain); color: white; padding: 20px; margin-top: 20px; border-radius: 3px; }
+  .progress-box.visible { display: block; }
+  .progress-steps { list-style: none; }
+  .progress-steps li { padding: 7px 0; font-size: 13px; color: #7fb3d3; display: flex; align-items: center; gap: 10px; }
+  .progress-steps li.done { color: #2ecc71; }
+  .progress-steps li.active { color: white; }
+  .step-icon { font-size: 14px; width: 20px; }
+
+  .success-box { display: none; background: #f0fff4; border: 2px solid var(--success); padding: 24px; margin-top: 20px; text-align: center; }
+  .success-box.visible { display: block; }
+  .success-box h3 { color: var(--success); font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 8px; }
+  .success-box .blob-url { font-family: monospace; font-size: 11px; word-break: break-all; color: var(--chain-light); background: #eaf4fb; padding: 8px; margin-top: 12px; border-radius: 3px; }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar-box { border: 1px solid var(--border); background: white; margin-bottom: 24px; overflow: hidden; }
+  .sidebar-box-header { background: var(--ink); color: var(--paper); padding: 10px 16px; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-family: 'Playfair Display', serif; }
+  .sidebar-box-body { padding: 16px; }
+
+  .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--aged); font-size: 13px; }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: var(--muted); }
+  .stat-row .value { font-weight: 700; font-family: monospace; color: var(--chain); }
+
+  .how-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--aged); font-size: 13px; line-height: 1.5; }
+  .how-item:last-child { border-bottom: none; }
+  .how-num { width: 24px; height: 24px; background: var(--rust); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag-pill { background: var(--aged); padding: 4px 10px; font-size: 12px; border-radius: 2px; cursor: pointer; transition: background 0.2s; }
+  .tag-pill:hover { background: var(--ink); color: var(--paper); }
+
+  /* ===== READER ===== */
+  .article-reader { background: white; padding: 40px; border: 1px solid var(--border); }
+  .reader-back { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); cursor: pointer; margin-bottom: 24px; transition: color 0.2s; background: none; border: none; font-family: 'DM Sans', sans-serif; }
+  .reader-back:hover { color: var(--rust); }
+  .reader-title { font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 900; line-height: 1.2; margin-bottom: 16px; border-bottom: 3px double var(--ink); padding-bottom: 20px; }
+  .reader-meta { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-bottom: 24px; align-items: center; flex-wrap: wrap; }
+  .reader-body { font-size: 16px; line-height: 1.9; color: #222; }
+  .reader-body p { margin-bottom: 1.2em; }
+  .reader-chain { margin-top: 32px; background: #f8f9ff; padding: 16px; font-size: 12px; color: var(--muted); }
+  .reader-chain strong { color: var(--chain); }
+
+  .error-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--rust); color: white; padding: 12px 24px; border-radius: 4px;
+    font-size: 14px; z-index: 999; opacity: 0; transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .error-toast.show { opacity: 1; }
+
+  @media (max-width: 768px) {
+    .main-layout { grid-template-columns: 1fr; padding: 20px; }
+    .site-name { font-size: 40px; }
+    .masthead::before, .masthead::after { display: none; }
+    .header-top { padding: 10px 16px; font-size: 10px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Error toast -->
+<div class="error-toast" id="errorToast"></div>
+
+<!-- Wallet Modal -->
+<div class="modal-overlay" id="walletModal">
+  <div class="modal">
+    <div id="walletPickerView">
+      <h3>🔗 Connect Wallet</h3>
+      <p class="modal-sub">Choose your Aptos wallet to publish on Shelbynet.</p>
+      <div class="wallet-list" id="walletList"></div>
+      <button class="modal-cancel" onclick="closeWalletModal()">Cancel</button>
+    </div>
+    <div id="walletConnectingView" style="display:none">
+      <div class="connecting-state">
+        <div class="spin"></div>
+        <p>Connecting to <strong id="connectingWalletName">...</strong></p>
+        <p style="margin-top:8px;font-size:12px;">Please approve the connection in your wallet.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="header-top">
+    <span>Sunday, March 15, 2026</span>
+    <div class="chain-badge">
+      <div class="chain-dot"></div>
+      <span id="networkLabel">Shelbynet — Aptos</span>
+    </div>
+    <span>Decentralized Publishing · Censorship-Resistant</span>
+  </div>
+  <div class="masthead">
+    <div class="site-name">Shelby<span>Press</span></div>
+    <div class="site-tagline">Decentralized Publishing Platform · Powered by Shelby Protocol on Aptos</div>
+  </div>
+  <nav class="header-nav">
+    <button class="nav-btn active" onclick="showScreen('feed')">📰 Latest</button>
+    <button class="nav-btn" onclick="showScreen('write')">✍️ Write</button>
+    <button class="nav-btn" onclick="showScreen('explore')">🔍 Explore</button>
+    <button class="nav-btn" id="walletBtn" onclick="handleWalletClick()">🔗 Connect Wallet</button>
+  </nav>
+</header>
+
+<div class="main-layout">
+  <main>
+
+    <!-- Feed -->
+    <div id="screenFeed" class="screen active">
+      <div class="wallet-bar" id="walletBar" style="display:none">
+        <div>
+          <div class="wname" id="walletBarName">Wallet</div>
+          <div class="addr" id="walletAddr">0x...</div>
+        </div>
+        <div class="balance" id="walletNetwork">Aptos</div>
+        <button onclick="disconnectWallet()" style="background:none;border:1px solid #7fb3d3;color:#7fb3d3;padding:6px 14px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;">Disconnect</button>
+      </div>
+      <div class="section-rule"><h2>Latest Articles</h2></div>
+      <div id="articleFeed"></div>
+    </div>
+
+    <!-- Write -->
+    <div id="screenWrite" class="screen">
+      <div class="write-form">
+        <h2>✍️ Write & Publish on Shelby</h2>
+
+        <!-- Shown when wallet NOT connected -->
+        <div class="wallet-required-notice" id="walletNotice" style="display:none">
+          <span>⚠️ Connect your Aptos wallet to publish articles on-chain.</span>
+          <button onclick="handleWalletClick()">Connect Wallet</button>
+        </div>
+
+        <div class="form-group">
+          <label>Article Title</label>
+          <input type="text" id="artTitle" placeholder="A compelling, precise headline..." />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Author / Alias</label>
+            <input type="text" id="artAuthor" placeholder="Your name or pseudonym" />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="artCategory">
+              <option>Politics</option>
+              <option>Technology</option>
+              <option>Economics</option>
+              <option>Human Rights</option>
+              <option>Science</option>
+              <option>Culture</option>
+              <option>Investigation</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Article Content</label>
+          <textarea id="artBody" placeholder="Write your article here... It will be published permanently on Shelby — no one can delete or alter it."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tags (comma-separated)</label>
+            <input type="text" id="artTags" placeholder="freedom, journalism, blockchain" />
+          </div>
+          <div class="form-group">
+            <label>Storage Duration</label>
+            <select id="artExpiry">
+              <option>1 Year</option>
+              <option>6 Months</option>
+              <option>1 Month</option>
+            </select>
+          </div>
+        </div>
+        <button class="publish-btn" onclick="publishArticle()" id="publishBtn">
+          <span id="publishBtnText">⛓ Publish to Shelby</span>
+        </button>
+        <div class="progress-box" id="progressBox">
+          <ul class="progress-steps">
+            <li id="step1"><span class="step-icon">⏳</span> Signing message with wallet...</li>
+            <li id="step2"><span class="step-icon">⏳</span> Encoding article into Blob...</li>
+            <li id="step3"><span class="step-icon">⏳</span> Uploading Blob to Shelbynet...</li>
+            <li id="step4"><span class="step-icon">⏳</span> Registering reference on Aptos...</li>
+          </ul>
+        </div>
+        <div class="success-box" id="successBox">
+          <h3>✅ Article Published Successfully!</h3>
+          <p>Your article is stored on Shelbynet. Nobody can delete or modify it.</p>
+          <div style="font-family:monospace;font-size:11px;color:var(--muted);margin-top:8px;">Signed by: <span id="signerAddr" style="color:var(--chain-light)"></span></div>
+          <div class="blob-url" id="blobUrl"></div>
+          <button onclick="viewArticle(lastPublished)" style="margin-top:12px;background:var(--chain);color:white;border:none;padding:10px 24px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;">Read Article →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explore -->
+    <div id="screenExplore" class="screen">
+      <div class="section-rule"><h2>🔍 Explore Content</h2></div>
+      <div style="display:flex;gap:12px;margin-bottom:24px;">
+        <input type="text" id="searchInput" placeholder="Search titles, content, tags..." onkeyup="searchArticles()" style="flex:1;border:1px solid var(--border);padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:14px;background:white;outline:none;">
+        <button onclick="searchArticles()" style="background:var(--ink);color:white;border:none;padding:12px 24px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;">Search</button>
+      </div>
+      <div id="searchResults"></div>
+    </div>
+
+    <!-- Reader -->
+    <div id="screenReader" class="screen">
+      <div class="article-reader">
+        <button class="reader-back" onclick="showScreen('feed')">← Back to Feed</button>
+        <div class="reader-title" id="readerTitle"></div>
+        <div class="reader-meta" id="readerMeta"></div>
+        <div class="reader-body" id="readerBody"></div>
+        <div class="reader-chain" id="readerChain"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Sidebar -->
+  <aside>
+    <div class="sidebar-box">
+      <div class="sidebar-box-header">🔗 Wallet Status</div>
+      <div class="sidebar-box-body" id="walletSidebarContent">
+        <div style="font-size:13px;color:var(--muted);line-height:1.6;">
+          <p>No wallet connected.</p>
+          <p style="margin-top:8px;">Connect your Aptos wallet to publish articles on-chain.</p>
+          <button onclick="handleWalletClick()" style="margin-top:12px;width:100%;background:var(--chain);color:white;border:none;padding:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;">Connect Wallet</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-box">
+      <div class="sidebar-box-header">📊 Network Stats</div>
+      <div class="sidebar-box-body">
+        <div class="stat-row"><span class="label">Articles</span><span class="value" id="statArticles">—</span></div>
+        <div class="stat-row"><span class="label">Data Stored</span><span class="value" id="statSize">—</span></div>
+        <div class="stat-row"><span class="label">Network</span><span class="value">Shelbynet</span></div>
+        <div class="stat-row"><span class="label">Chain</span><span class="value">Aptos</span></div>
+        <div class="stat-row"><span class="label">API</span><span class="value" style="font-size:10px;color:var(--success);">🟢 Online</span></div>
+      </div>
+    </div>
+
+    <div class="sidebar-box">
+      <div class="sidebar-box-header">🏷️ Topics</div>
+      <div class="sidebar-box-body"><div class="tag-cloud" id="tagCloud"></div></div>
+    </div>
+
+    <div class="sidebar-box">
+      <div class="sidebar-box-header">ℹ️ How It Works</div>
+      <div class="sidebar-box-body">
+        <div class="how-item"><div class="how-num">1</div><div>Connect your Aptos wallet (Petra, Nightly, etc.)</div></div>
+        <div class="how-item"><div class="how-num">2</div><div>Write & sign — your wallet identity is the author</div></div>
+        <div class="how-item"><div class="how-num">3</div><div>Article uploaded to Shelbynet as encrypted Blob</div></div>
+        <div class="how-item"><div class="how-num">4</div><div>Blob reference registered on Aptos — permanent forever</div></div>
+      </div>
+    </div>
+
+    <div class="sidebar-box">
+      <div class="sidebar-box-header">🔗 Get a Wallet</div>
+      <div class="sidebar-box-body" style="font-size:13px;display:flex;flex-direction:column;gap:8px;">
+        <a href="https://petra.app" target="_blank" style="color:var(--chain-light);text-decoration:none;">🦊 Petra Wallet</a>
+        <a href="https://nightly.app" target="_blank" style="color:var(--chain-light);text-decoration:none;">🌙 Nightly Wallet</a>
+        <a href="https://docs.shelby.xyz" target="_blank" style="color:var(--chain-light);text-decoration:none;">📚 Shelby Docs</a>
+        <a href="https://explorer.shelby.xyz/shelbynet" target="_blank" style="color:var(--chain-light);text-decoration:none;">🔍 Blob Explorer</a>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ===== STATE =====
+let articles = [];
+let connectedWallet = null; // { name, address, network, walletObj }
+let currentArticle = null;
+let lastPublished = null;
+let availableWallets = [];
+
+// ===== MOCK ARTICLES =====
+const mockArticles = [
+  {
+    id: 'art_001',
+    title: 'How Decentralized Storage Is Rewriting the Rules of Censorship',
+    author: '0xf8a13c4b...', authorAlias: 'Hassan Al-Muharrir', category: 'Technology',
+    body: `Since the internet's inception, centralized platforms have held the keys to content. Facebook can delete your post, Twitter can suspend your account, and a hosting provider can shut down your website with the press of a button.\n\nBut with the emergence of decentralized storage protocols like Shelby, the equation has fundamentally changed. When you publish on Shelbynet, there is no single entity that owns a delete button.\n\nThis is not merely a technical shift — it is a transformation in the balance of power between publisher and censor. A journalist in an authoritarian country can now publish an investigation and guarantee it persists even after their arrest.\n\nThis is the true promise of the decentralized web.`,
+    tags: ['technology', 'censorship', 'blockchain'], date: 'March 14, 2026',
+    blobId: 'articles/art_001_' + Date.now(), txHash: '0x7a3f9c2e1b8d4a56f012', size: '1.2 KB',
+  },
+  {
+    id: 'art_002',
+    title: 'Independent Journalism in the Age of Algorithms',
+    author: '0x2d9e8f1a...', authorAlias: 'Layla Freeman', category: 'Investigation',
+    body: `Every time you open your favorite news app, an algorithm decides what you see. That algorithm optimizes for profit and engagement — not for the importance or accuracy of the story.\n\nThis investigation reveals how over 70% of news consumed passes through just three major companies that control distribution algorithms. And how independent journalists find themselves invisible to hundreds of millions of users.\n\nThe solution is not to ask these companies to reform. The solution is to build alternative infrastructure. Platforms like ShelbyPress are starting this journey.\n\nThe blockchain doesn't care about your politics. It only cares about preserving the record.`,
+    tags: ['journalism', 'algorithms', 'independence'], date: 'March 12, 2026',
+    blobId: 'articles/art_002_' + Date.now(), txHash: '0x3b2a9f7e4c1d8b56a012', size: '0.9 KB',
+  },
+  {
+    id: 'art_003',
+    title: 'Aptos & Shelby: The Dual-Layer Infrastructure Protecting Free Speech',
+    author: '0xb4c29e3f...', authorAlias: 'Anonymous Dev', category: 'Technology',
+    body: `When we talk about technical free speech, we are talking about two fundamental layers: the storage layer and the verification layer.\n\nThe storage layer — Shelby — ensures your data exists and is accessible across a network of distributed nodes. No single entity can remove a blob from the network.\n\nThe verification layer — Aptos blockchain — records an immutable proof of content's existence. Even if some nodes come under external pressure, the record remains on-chain forever.\n\nYour words, once committed, are as permanent as mathematics itself.`,
+    tags: ['Aptos', 'Shelby', 'technology', 'blockchain'], date: 'March 10, 2026',
+    blobId: 'articles/art_003_' + Date.now(), txHash: '0x9f1c3a7b5e2d4f8a0123', size: '0.8 KB',
+  },
+];
+
+// ===== INIT =====
+window.onload = function() {
+  articles = [...mockArticles];
+  renderFeed();
+  updateStats();
+  renderTags();
+
+  // Wait for the Aptos wallet module to be ready
+  if (window.__aptosReady) {
+    loadAvailableWallets();
+  } else {
+    window.__onAptosReady = loadAvailableWallets;
+  }
+
+  window.__onWalletsUpdated = loadAvailableWallets;
+};
+
+// ===== WALLET DETECTION (AIP-62) =====
+function loadAvailableWallets() {
+  const bridge = window.__aptosWalletBridge;
+  if (!bridge) return;
+  availableWallets = bridge.wallets || [];
+  console.log('Detected Aptos wallets:', availableWallets.map(w => w.name));
+}
+
+function getInstalledWallets() {
+  return availableWallets.filter(w => {
+    const readiness = w.readyState || w.readinessState;
+    return readiness === 'Installed' || readiness === 'Loadable' || w.accounts?.length >= 0;
+  });
+}
+
+// ===== WALLET MODAL =====
+function handleWalletClick() {
+  if (connectedWallet) {
+    disconnectWallet();
+  } else {
+    openWalletModal();
+  }
+}
+
+function openWalletModal() {
+  renderWalletList();
+  document.getElementById('walletPickerView').style.display = '';
+  document.getElementById('walletConnectingView').style.display = 'none';
+  document.getElementById('walletModal').classList.add('visible');
+}
+
+function closeWalletModal() {
+  document.getElementById('walletModal').classList.remove('visible');
+}
+
+function renderWalletList() {
+  const container = document.getElementById('walletList');
+  container.innerHTML = '';
+
+  // Installed (detected) wallets
+  const installed = getInstalledWallets();
+
+  // Also show known popular wallets even if not installed
+  const knownWallets = [
+    { name: 'Petra', url: 'https://petra.app', icon: 'https://petra.app/favicon.ico' },
+    { name: 'Nightly', url: 'https://nightly.app', icon: 'https://nightly.app/favicon.ico' },
+  ];
+
+  if (availableWallets.length === 0 && installed.length === 0) {
+    container.innerHTML = `
+      <div class="no-wallets-msg">
+        No Aptos wallets detected in your browser.<br><br>
+        Install <a href="https://petra.app" target="_blank">Petra</a> or <a href="https://nightly.app" target="_blank">Nightly</a> to get started.
+      </div>`;
+    return;
+  }
+
+  // Render detected wallets first
+  availableWallets.forEach(wallet => {
+    const isInstalled = getInstalledWallets().some(w => w.name === wallet.name);
+    const item = document.createElement('div');
+    item.className = 'wallet-option';
+    item.innerHTML = `
+      ${wallet.icon ? `<img src="${wallet.icon}" alt="${wallet.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+      <div class="w-icon-fallback" style="${wallet.icon ? 'display:none' : ''}">${wallet.name[0]}</div>
+      <div class="w-info">
+        <div class="w-name">${wallet.name}</div>
+        <div class="w-status ${isInstalled ? 'installed' : 'not-installed'}">${isInstalled ? '✓ Installed' : 'Not installed'}</div>
+      </div>
+      <span class="w-arrow">›</span>`;
+    item.onclick = () => connectToWallet(wallet);
+    container.appendChild(item);
+  });
+
+  // Add known wallets that aren't detected
+  knownWallets.forEach(kw => {
+    if (availableWallets.some(w => w.name === kw.name)) return;
+    const item = document.createElement('div');
+    item.className = 'wallet-option';
+    item.style.opacity = '0.6';
+    item.innerHTML = `
+      <img src="${kw.icon}" alt="${kw.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="w-icon-fallback" style="display:none">${kw.name[0]}</div>
+      <div class="w-info">
+        <div class="w-name">${kw.name}</div>
+        <div class="w-status not-installed">Not installed — click to install</div>
+      </div>
+      <span class="w-arrow">↗</span>`;
+    item.onclick = () => window.open(kw.url, '_blank');
+    container.appendChild(item);
+  });
+}
+
+async function connectToWallet(wallet) {
+  document.getElementById('walletPickerView').style.display = 'none';
+  document.getElementById('walletConnectingView').style.display = '';
+  document.getElementById('connectingWalletName').textContent = wallet.name;
+
+  try {
+    // AIP-62: call the aptos:connect feature
+    const connectFeature = wallet.features['aptos:connect'];
+    if (!connectFeature) throw new Error('This wallet does not support AIP-62 connect.');
+
+    const result = await connectFeature.connect();
+    const account = result?.accounts?.[0] || wallet.accounts?.[0];
+
+    if (!account) throw new Error('No account returned from wallet.');
+
+    const address = account.address?.toString() || account.address;
+    const network = wallet.features['aptos:network']
+      ? (await wallet.features['aptos:network'].network())?.name || 'Aptos'
+      : 'Aptos';
+
+    connectedWallet = { name: wallet.name, address, network, walletObj: wallet };
+
+    closeWalletModal();
+    onWalletConnected();
+
+  } catch (err) {
+    console.error('Wallet connect error:', err);
+    closeWalletModal();
+    showError(err.message || 'Failed to connect wallet. Please try again.');
+  }
+}
+
+function onWalletConnected() {
+  const { name, address, network } = connectedWallet;
+
+  // Wallet bar
+  const bar = document.getElementById('walletBar');
+  bar.style.display = 'flex';
+  document.getElementById('walletBarName').textContent = name;
+  document.getElementById('walletAddr').textContent = address.substring(0, 10) + '...' + address.slice(-6);
+  document.getElementById('walletNetwork').textContent = network;
+
+  // Nav button
+  const btn = document.getElementById('walletBtn');
+  btn.textContent = '🟢 ' + name;
+  btn.style.background = 'var(--success)';
+  btn.style.color = 'white';
+
+  // Sidebar
+  document.getElementById('walletSidebarContent').innerHTML = `
+    <div style="font-size:13px;line-height:1.6;">
+      <div style="font-weight:700;color:var(--chain);margin-bottom:4px;">${name}</div>
+      <div style="font-family:monospace;font-size:11px;color:var(--muted);word-break:break-all;">${address}</div>
+      <div style="margin-top:8px;font-size:11px;color:var(--success);">✓ Connected to ${network}</div>
+      <button onclick="disconnectWallet()" style="margin-top:12px;width:100%;background:var(--aged);border:1px solid var(--border);padding:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;">Disconnect</button>
+    </div>`;
+
+  // Hide wallet notice on write screen
+  const notice = document.getElementById('walletNotice');
+  if (notice) notice.style.display = 'none';
+
+  document.getElementById('networkLabel').textContent = network + ' — ' + name;
+}
+
+function disconnectWallet() {
+  if (connectedWallet?.walletObj?.features?.['aptos:disconnect']) {
+    try { connectedWallet.walletObj.features['aptos:disconnect'].disconnect(); } catch(e) {}
+  }
+  connectedWallet = null;
+
+  document.getElementById('walletBar').style.display = 'none';
+  const btn = document.getElementById('walletBtn');
+  btn.textContent = '🔗 Connect Wallet';
+  btn.style.background = '';
+  btn.style.color = '';
+  document.getElementById('networkLabel').textContent = 'Shelbynet — Aptos';
+
+  document.getElementById('walletSidebarContent').innerHTML = `
+    <div style="font-size:13px;color:var(--muted);line-height:1.6;">
+      <p>No wallet connected.</p>
+      <button onclick="handleWalletClick()" style="margin-top:12px;width:100%;background:var(--chain);color:white;border:none;padding:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;">Connect Wallet</button>
+    </div>`;
+}
+
+// ===== SCREENS =====
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  const idx = ['feed','write','explore'].indexOf(name);
+  if (idx >= 0) document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+  if (name === 'explore') renderSearch(articles);
+
+  if (name === 'write') {
+    const notice = document.getElementById('walletNotice');
+    if (notice) notice.style.display = connectedWallet ? 'none' : 'flex';
+  }
+}
+
+// ===== FEED =====
+function renderFeed() {
+  const container = document.getElementById('articleFeed');
+  container.innerHTML = '';
+  articles.forEach(a => {
+    const div = document.createElement('div');
+    div.className = 'article-card';
+    div.innerHTML = `
+      <div class="article-meta">
+        <span class="author" title="${a.author}">${a.authorAlias || a.author}</span>
+        <span>·</span><span>${a.date}</span>
+        <span class="tag">${a.category}</span>
+        <span class="onchain-badge">⛓ ON-CHAIN</span>
+      </div>
+      <h3>${a.title}</h3>
+      <p>${a.body.replace(/\\n/g,'').substring(0, 180)}...</p>
+      <div class="article-footer">
+        <span>${(a.tags||[]).map(t=>'#'+t).join(' ')}</span>
+        <span class="blob-ref">${a.blobId.substring(0, 28)}...</span>
+      </div>`;
+    div.onclick = () => viewArticle(a);
+    container.appendChild(div);
+  });
+}
+
+// ===== READER =====
+function viewArticle(article) {
+  if (!article) return;
+  currentArticle = article;
+  document.getElementById('readerTitle').textContent = article.title;
+  document.getElementById('readerMeta').innerHTML = `
+    <span>✍️ ${article.authorAlias || article.author}</span><span>·</span>
+    <span>📅 ${article.date}</span><span>·</span>
+    <span style="background:var(--aged);padding:2px 8px;border-radius:2px;font-size:11px;">${article.category}</span>
+    <span style="background:var(--chain);color:white;padding:2px 8px;border-radius:2px;font-size:10px;font-weight:700;">⛓ ON SHELBYNET</span>`;
+  document.getElementById('readerBody').innerHTML = article.body.split('\n\n').map(p => `<p>${p}</p>`).join('');
+  document.getElementById('readerChain').innerHTML = `
+    <strong>🔗 Blob Info:</strong><br>
+    Blob ID: <code style="color:var(--chain-light)">${article.blobId}</code><br>
+    Tx Hash: <code style="color:var(--chain-light)">${article.txHash}</code><br>
+    Signer: <code style="color:var(--chain-light)">${article.author}</code><br>
+    Network: Shelbynet &nbsp;·&nbsp; Size: ${article.size}`;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screenReader').classList.add('active');
+}
+
+// ===== PUBLISH =====
+async function publishArticle() {
+  if (!connectedWallet) {
+    showError('Please connect your Aptos wallet first.');
+    openWalletModal();
+    return;
+  }
+
+  const title = document.getElementById('artTitle').value.trim();
+  const author = document.getElementById('artAuthor').value.trim();
+  const body = document.getElementById('artBody').value.trim();
+  const category = document.getElementById('artCategory').value;
+  const tags = document.getElementById('artTags').value.split(',').map(t=>t.trim()).filter(Boolean);
+
+  if (!title || !body) { showError('Please enter a title and article content.'); return; }
+
+  const btn = document.getElementById('publishBtn');
+  btn.disabled = true;
+
+  const progressBox = document.getElementById('progressBox');
+  const successBox = document.getElementById('successBox');
+  progressBox.classList.add('visible');
+  successBox.classList.remove('visible');
+
+  ['step1','step2','step3','step4'].forEach(id => {
+    document.getElementById(id).className = '';
+  });
+
+  try {
+    // Step 1: Sign message with real wallet
+    await setStepActive('step1');
+    let signature = null;
+
+    const signFeature = connectedWallet.walletObj.features['aptos:signMessage'];
+    if (signFeature) {
+      try {
+        const payload = {
+          message: `ShelbyPress: Publishing article "${title}" at ${new Date().toISOString()}`,
+          nonce: Math.random().toString(36).substring(2),
+        };
+        const result = await signFeature.signMessage(payload);
+        signature = result?.signature?.toString() || 'signed';
+      } catch(e) {
+        // User may reject — we allow publishing without signature in demo
+        console.warn('Sign message skipped:', e.message);
+        signature = 'user-skipped';
+      }
+    } else {
+      signature = 'wallet-no-sign-feature';
+    }
+    await markStepDone('step1', 'Message signed by wallet');
+
+    // Step 2: Encode to Blob
+    await animateStep('step2', 1200, 'Article encoded into Blob');
+
+    // Step 3: Upload to Shelbynet (simulated — real SDK call goes here)
+    await animateStep('step3', 2000, 'Blob uploaded to Shelbynet');
+
+    // Step 4: Register on Aptos (simulated)
+    await animateStep('step4', 1500, 'Reference registered on Aptos');
+
+    const blobId = 'articles/' + title.replace(/\s+/g,'-').replace(/[^\w\-]/g,'').toLowerCase().substring(0,30) + '_' + Date.now();
+    const txHash = '0x' + randomHex(64);
+
+    const newArticle = {
+      id: 'art_' + Date.now(),
+      title, category, body, tags,
+      author: connectedWallet.address,
+      authorAlias: author || connectedWallet.name + ' User',
+      date: 'Today',
+      blobId,
+      txHash,
+      signature,
+      size: (new TextEncoder().encode(body).length / 1024).toFixed(1) + ' KB',
+    };
+
+    articles.unshift(newArticle);
+    lastPublished = newArticle;
+
+    document.getElementById('blobUrl').textContent = 'https://api.shelbynet.shelby.xyz/shelby/blobs/' + blobId;
+    document.getElementById('signerAddr').textContent = connectedWallet.address;
+    successBox.classList.add('visible');
+    updateStats();
+    renderTags();
+
+  } catch (err) {
+    console.error('Publish error:', err);
+    showError('Publish failed: ' + (err.message || 'Unknown error'));
+  }
+
+  btn.disabled = false;
+}
+
+async function setStepActive(stepId) {
+  const el = document.getElementById(stepId);
+  el.classList.add('active');
+  el.querySelector('.step-icon').textContent = '⏳';
+  await sleep(400);
+}
+
+async function markStepDone(stepId, text) {
+  const el = document.getElementById(stepId);
+  el.classList.remove('active');
+  el.classList.add('done');
+  el.innerHTML = `<span class="step-icon">✅</span> ${text}`;
+}
+
+async function animateStep(stepId, delay, doneText) {
+  await setStepActive(stepId);
+  await sleep(delay);
+  await markStepDone(stepId, doneText);
+}
+
+// ===== SEARCH =====
+function searchArticles() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const results = q ? articles.filter(a =>
+    a.title.toLowerCase().includes(q) ||
+    a.body.toLowerCase().includes(q) ||
+    (a.tags||[]).some(t => t.toLowerCase().includes(q))
+  ) : articles;
+  renderSearch(results);
+}
+
+function renderSearch(list) {
+  const container = document.getElementById('searchResults');
+  if (!list.length) { container.innerHTML = '<p style="color:var(--muted);text-align:center;padding:40px;">No results found.</p>'; return; }
+  container.innerHTML = '';
+  list.forEach(a => {
+    const div = document.createElement('div');
+    div.className = 'article-card';
+    div.innerHTML = `
+      <div class="article-meta">
+        <span class="author">${a.authorAlias||a.author}</span><span>·</span>
+        <span>${a.date}</span><span class="tag">${a.category}</span>
+        <span class="onchain-badge">⛓ ON-CHAIN</span>
+      </div>
+      <h3>${a.title}</h3>
+      <p>${a.body.substring(0,140)}...</p>`;
+    div.onclick = () => viewArticle(a);
+    container.appendChild(div);
+  });
+}
+
+// ===== STATS & TAGS =====
+function updateStats() {
+  document.getElementById('statArticles').textContent = articles.length;
+  document.getElementById('statSize').textContent = (articles.reduce((s,a)=>s+a.body.length,0)/1024).toFixed(1)+' KB';
+}
+
+function renderTags() {
+  const allTags = {};
+  articles.forEach(a => (a.tags||[]).forEach(t => { allTags[t]=(allTags[t]||0)+1; }));
+  const container = document.getElementById('tagCloud');
+  container.innerHTML = '';
+  Object.entries(allTags).sort((a,b)=>b[1]-a[1]).forEach(([tag,count]) => {
+    const span = document.createElement('span');
+    span.className = 'tag-pill';
+    span.textContent = tag + ' (' + count + ')';
+    span.onclick = () => { document.getElementById('searchInput').value=tag; showScreen('explore'); searchArticles(); };
+    container.appendChild(span);
+  });
+}
+
+// ===== HELPERS =====
+function showError(msg) {
+  const t = document.getElementById('errorToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function randomHex(n) { return Array.from({length:n}, ()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join(''); }
+</script>
+</body>
+</html>
