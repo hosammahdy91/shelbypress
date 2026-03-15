@@ -1,100 +1,241 @@
-<h1 align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=28&duration=3000&pause=1000&color=092E20&center=true&vCenter=true&width=600&lines=Hi+there%2C+I'm+Hosam+%F0%9F%91%8B;Full+Stack+Developer;Python+%26+Django+Enthusiast+%F0%9F%90%8D;Problem+Solver+%F0%9F%A7%A9" alt="Typing SVG" />
-</h1>
+<div align="center">
 
-<p align="center">
-  <img src="https://komarev.com/ghpvc/?username=hosammahdy91&label=Profile%20views&color=092E20&style=flat" alt="profile views" />
-  <img src="https://img.shields.io/github/followers/hosammahdy91?label=Followers&style=flat&color=092E20" alt="followers" />
-</p>
+```
+███████╗██╗  ██╗███████╗██╗      ██████╗ ██╗   ██╗██████╗ ██████╗ ███████╗███████╗███████╗
+██╔════╝██║  ██║██╔════╝██║     ██╔══██╗╚██╗ ██╔╝██╔══██╗██╔══██╗██╔════╝██╔════╝██╔════╝
+███████╗███████║█████╗  ██║     ██████╔╝ ╚████╔╝ ██████╔╝██████╔╝█████╗  ███████╗███████╗
+╚════██║██╔══██║██╔══╝  ██║     ██╔══██╗  ╚██╔╝  ██╔═══╝ ██╔══██╗██╔══╝  ╚════██║╚════██║
+███████║██║  ██║███████╗███████╗██████╔╝   ██║   ██║     ██║  ██║███████╗███████║███████║
+╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═════╝    ╚═╝   ╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
+```
 
----
+### ⛓ Censorship-Resistant Publishing on Shelby Protocol × Aptos
 
-## 👨‍💻 About Me
+<br/>
 
-I'm a **Full Stack Developer** from 🇪🇬 Egypt, specializing in **Python & Django** backend development with a passion for building clean, scalable web applications.
+[![Shelby Protocol](https://img.shields.io/badge/Built_on-Shelby_Protocol-0066FF?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyIDJMMiA3bDEwIDUgMTAtNS0xMC01ek0yIDE3bDEwIDUgMTAtNS0xMC01LTEwIDV6TTIgMTJsMTAgNSAxMC01LTEwLTUtMTAgNXoiLz48L3N2Zz4=)](https://shelby.xyz)
+[![Aptos](https://img.shields.io/badge/Aptos-Blockchain-00C2FF?style=for-the-badge)](https://aptoslabs.com)
+[![AIP-62](https://img.shields.io/badge/Wallet-AIP--62-22C55E?style=for-the-badge)](https://github.com/aptos-foundation/AIPs)
+[![MIT License](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)](LICENSE)
+[![Early Access](https://img.shields.io/badge/Early_Access-Requested-EF4444?style=for-the-badge)](https://developers.shelby.xyz)
 
-- 🔭 Currently building full stack web apps with **Django + REST APIs**
-- 🌱 Deepening expertise in **Python**, **Django**, and **backend architecture**
-- 👯 Open to collaborating on **open-source Python/Django projects**
-- 💬 Ask me about **Python, Django, REST APIs, Web Development**
-- 📫 Reach me: **01016173264** (WhatsApp)
-- ⚡ Fun fact: I think elegant Python code is poetry
+<br/>
 
----
+> **"Your words, once committed, are as permanent as mathematics."**
 
-## 🛠️ Tech Stack
+<br/>
 
-### Core — Backend
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white)
-![Django REST](https://img.shields.io/badge/Django_REST-ff1709?style=for-the-badge&logo=django&logoColor=white)
+[🚀 Live Demo](https://shelbypress.vercel.app) &nbsp;·&nbsp; [📋 Roadmap](#-roadmap) &nbsp;·&nbsp; [🔌 SDK Preview](#-shelby-sdk-integration) &nbsp;·&nbsp; [🤝 Early Access](#-early-access)
 
-### Frontend
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![Bootstrap](https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)
-
-### Database
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white)
-
-### Tools & DevOps
-![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
-![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
-![VS Code](https://img.shields.io/badge/VS_Code-0078D4?style=for-the-badge&logo=visual%20studio%20code&logoColor=white)
+</div>
 
 ---
 
-## 📊 GitHub Stats
+## 🧩 What is ShelbyPress?
 
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=hosammahdy91&show_icons=true&theme=tokyonight&hide_border=true&count_private=true" alt="GitHub Stats" width="48%" />
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=hosammahdy91&layout=compact&theme=tokyonight&hide_border=true" alt="Top Languages" width="48%" />
-</p>
+**ShelbyPress** is the first publishing platform built entirely on **Shelby Protocol's hot decentralized storage** and **Aptos blockchain**.
 
-<p align="center">
-  <img src="https://github-readme-streak-stats.herokuapp.com/?user=hosammahdy91&theme=tokyonight&hide_border=true" alt="GitHub Streak" width="60%" />
-</p>
+Unlike Medium, Substack, or any traditional platform — no company, government, or server operator can delete, alter, or censor content published on ShelbyPress.
 
----
-
-## 🏆 GitHub Trophies
-
-<p align="center">
-  <img src="https://github-profile-trophy.vercel.app/?username=hosammahdy91&theme=tokyonight&no-frame=true&row=1&column=6" alt="trophies" />
-</p>
+Every article is:
+- 📦 **Stored** as an encrypted Blob on Shelbynet
+- 🔐 **Signed** by the author's Aptos wallet
+- ⛓ **Registered** on Aptos blockchain as immutable proof
+- ♾️ **Permanent** — distributed across nodes worldwide
 
 ---
 
-## 📈 Contribution Graph
+## 🎯 The Problem We Solve
 
-<p align="center">
-  <img src="https://github-readme-activity-graph.vercel.app/graph?username=hosammahdy91&theme=tokyo-night&hide_border=true" alt="Contribution Graph" />
-</p>
+```
+Today's internet:
 
----
+  Writer ──► Platform ──► Reader
+               │
+               └──► Can DELETE, EDIT, SHADOW-BAN, CENSOR at any time
 
-## 🤝 Connect With Me
+ShelbyPress:
 
-<p align="center">
-  <a href="https://github.com/hosammahdy91">
-    <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" />
-  </a>
-  <a href="mailto:hosammahdy91@gmail.com">
-    <img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" />
-  </a>
-</p>
+  Writer ──► Shelbynet + Aptos ──► Reader
+                    │
+                    └──► PERMANENT. No one has the delete button.
+```
 
 ---
 
-<p align="center">
-  <i>"Code is like humor. When you have to explain it, it's bad." — Cory House</i>
-</p>
+## ✨ Core Features
 
-<p align="center">
-  ⭐ If you find my work useful, consider starring my repositories!
-</p>
+| Feature | Description |
+|---------|-------------|
+| 🔗 **Wallet Login** | Connect any Aptos wallet via AIP-62 standard — Petra, Nightly, and more |
+| ✍️ **On-chain Publishing** | Articles signed by your wallet and stored as Shelby Blobs |
+| 📰 **Permanent Feed** | All published articles are immutable and always accessible |
+| 🔍 **Full-text Search** | Instant search across titles, content, and tags |
+| 🏷️ **Tag System** | Dynamic topic cloud for content discovery |
+| 📱 **Responsive** | Optimized for desktop and mobile |
+| ⚡ **Zero Dependencies** | Single HTML file — no frameworks, no build tools |
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                     Writer (Browser)                     │
+│                  Aptos Wallet (AIP-62)                   │
+└───────────────────────┬─────────────────────────────────┘
+                        │ signMessage
+                        ▼
+┌─────────────────────────────────────────────────────────┐
+│                  ShelbyPress Frontend                    │
+│              (HTML + CSS + Vanilla JS)                   │
+└──────────────┬──────────────────────┬───────────────────┘
+               │                      │
+               ▼                      ▼
+┌──────────────────────┐  ┌──────────────────────────────┐
+│   Shelby Protocol    │  │       Aptos Blockchain        │
+│                      │  │                               │
+│  upload(blob)        │  │  registerBlobReference(id)    │
+│       │              │  │            │                  │
+│       ▼              │  │            ▼                  │
+│  Shelbynet Nodes     │  │   On-chain proof of           │
+│  (distributed,       │  │   authorship + timestamp      │
+│   permanent)         │  │   (immutable forever)         │
+└──────────────────────┘  └──────────────────────────────┘
+```
+
+---
+
+## 🚀 Why Shelby Protocol?
+
+| | AWS S3 | IPFS | Filecoin | **Shelby** |
+|---|---|---|---|---|
+| Speed | ✅ Fast | ❌ Slow | ❌ Slow | ✅ **Fast** |
+| Decentralized | ❌ | ✅ | ✅ | ✅ |
+| Permanent | ❌ | ⚠️ | ✅ | ✅ |
+| Censorship-proof | ❌ | ⚠️ | ✅ | ✅ |
+| Hot storage | ✅ | ❌ | ❌ | ✅ |
+
+Shelby is the **only protocol** that combines all five properties — making it the ideal foundation for a censorship-resistant publishing platform.
+
+---
+
+## 🗺️ Roadmap
+
+### ✅ Phase 1 — Foundation (Done)
+- [x] Full publishing UI with newspaper aesthetic
+- [x] Aptos wallet connection via AIP-62 standard
+- [x] Wallet-signed article publishing flow
+- [x] Full-text search + tag system
+- [x] Responsive design
+
+### 🔄 Phase 2 — Shelby Integration (Awaiting Early Access)
+- [ ] `@shelby-protocol/sdk` integration
+- [ ] Real Blob upload to Shelbynet
+- [ ] On-chain Blob reference via Aptos transaction
+- [ ] Blob Explorer link for every article
+- [ ] Content verification via Shelbynet audit
+
+### 📋 Phase 3 — Platform Growth
+- [ ] Wallet-based author profiles
+- [ ] On-chain tipping (APT)
+- [ ] Article collections and series
+- [ ] DAO governance for platform policies
+- [ ] Multi-language support
+
+---
+
+## 🔌 Shelby SDK Integration
+
+Once Early Access is granted, the core publishing function becomes:
+
+```javascript
+import { ShelbyClient } from '@shelby-protocol/sdk';
+import { AptosClient } from '@aptos-labs/ts-sdk';
+
+async function publishArticle(article, wallet) {
+
+  // 1. Connect to Shelbynet
+  const shelby = new ShelbyClient({ network: 'shelbynet' });
+
+  // 2. Encode article as Blob
+  const blob = new Blob(
+    [JSON.stringify(article)],
+    { type: 'application/json' }
+  );
+
+  // 3. Upload to Shelbynet (hot decentralized storage)
+  const { blobId, size } = await shelby.upload(blob, {
+    duration: '1year',
+    signer: wallet.address,
+  });
+
+  // 4. Sign with Aptos wallet (AIP-62)
+  const signature = await wallet.signMessage({
+    message: `ShelbyPress: ${article.title}`,
+    nonce: blobId,
+  });
+
+  // 5. Register on Aptos blockchain
+  const txHash = await shelby.registerOnChain(blobId, {
+    wallet,
+    metadata: { title: article.title, author: wallet.address }
+  });
+
+  return {
+    blobId,
+    txHash,
+    url: `https://explorer.shelby.xyz/shelbynet/${blobId}`
+  };
+}
+```
+
+---
+
+## ⚡ Quick Start
+
+```bash
+# Clone
+git clone https://github.com/hosammahdy91/shelbypress.git
+cd shelbypress
+
+# Run (no build needed)
+open index.html
+
+# Or with a local server
+npx serve .
+```
+
+Then open your browser, connect your Aptos wallet, and start publishing.
+
+---
+
+## 🤝 Early Access
+
+ShelbyPress is purpose-built to demonstrate Shelby Protocol's potential as a **hot storage layer for censorship-resistant applications**.
+
+We are applying for Early Access to:
+
+- Integrate `@shelby-protocol/sdk` into production
+- Deploy live Blob storage on Shelbynet
+- Prove the use case at real scale
+
+**👉 [developers.shelby.xyz](https://developers.shelby.xyz)**
+
+---
+
+## 📄 License
+
+[MIT](LICENSE) — open source, free to fork and build upon.
+
+---
+
+<div align="center">
+
+Made with ⛓ by a builder who believes in the open web
+
+**Shelby Protocol × Aptos × Free Press**
+
+⭐ **Star this repo** if you believe the internet should be free
+
+</div>
